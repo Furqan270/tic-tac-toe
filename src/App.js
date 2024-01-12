@@ -1,73 +1,76 @@
-
-import * as React from 'react';
+import React, { useState } from "react";
+import {ChakraProvider,Box,Grid,Button,Heading,Center} from "@chakra-ui/react";
 
 function Board() {
-  const squares = Array(9).fill(null);
-  function selectSquare(square) {
+  const [squares, setSquares] = useState(Array(9).fill(null));
+  const [isXNext, setIsXNext] = useState(true);
 
+  function selectSquare(square) {
+    if (calculateWinner(squares) || squares[square]) {
+      return;
+    }
+
+    const newSquares = squares.slice();
+    newSquares[square] = isXNext ? "X" : "O";
+    setSquares(newSquares);
+    setIsXNext(!isXNext);
   }
 
   function restart() {
+    setSquares(Array(9).fill(null));
+    setIsXNext(true);
   }
 
   function renderSquare(i) {
+    
     return (
-      <button className="square" onClick={() => selectSquare(i)}>
-        {squares[i]}
-      </button>
+      <Button size="lg" fontSize="2xl" fontWeight="bold" colorScheme="telegram" className="square" onClick={() => selectSquare(i)}>{squares[i]}
+      </Button>
+      
     );
   }
 
+  const winner = calculateWinner(squares);
+  const status = winner
+    ? `Winner: ${winner}`
+    : squares.every(Boolean)
+    ? `Scratch: Cat's game`
+    : `Next player: ${isXNext ? "X" : "O"}`;
+    
+
   return (
-    <div>
-      <div >STATUS</div>
-      <div >
-        {renderSquare(0)}
-        {renderSquare(1)}
-        {renderSquare(2)}
-      </div>
-      <div >
-        {renderSquare(3)}
-        {renderSquare(4)}
-        {renderSquare(5)}
-      </div>
-      <div >
-        {renderSquare(6)}
-        {renderSquare(7)}
-        {renderSquare(8)}
-      </div>
-      <button onClick={restart}>
-        restart
-      </button>
-    </div>
+    <Box>
+      <Center>
+      <Heading as="h2" size="lg" marginBottom="4">
+        {status}
+        
+      </Heading>
+      </Center>
+
+      <Grid templateColumns="repeat(3, 1fr)" gap={2} width="300px" margin="auto"
+      >
+      {Array(9).fill(null).map((_, index) => (
+        <Box key={index}>{renderSquare(index)}</Box>
+          ))}
+      </Grid>
+      <Center>
+        <Button marginTop="4" colorScheme="red" onClick={restart}>Restart Game</Button>
+      </Center>
+    </Box>
   );
 }
 
 function Game() {
   return (
-    <div >
-      <div >
+    <Box>
+      <Box>
         <Board />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
-// eslint-disable-next-line no-unused-vars
-function calculateStatus(winner, squares, nextValue) {
-  return winner
-    ? `Winner: ${winner}`
-    : squares.every(Boolean)
-      ? `Scratch: Cat's game`
-      : `Next player: ${nextValue}`;
-}
-
-// eslint-disable-next-line no-unused-vars
-function calculateNextValue(squares) {
-  return squares.filter(Boolean).length % 2 === 0 ? 'X' : 'O';
-}
-
-// eslint-disable-next-line no-unused-vars
+// Function to calculate the winner
 function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
@@ -89,7 +92,11 @@ function calculateWinner(squares) {
 }
 
 function App() {
-  return <Game />;
+  return (
+    <ChakraProvider>
+      <Game />
+    </ChakraProvider>
+  );
 }
 
 export default App;
